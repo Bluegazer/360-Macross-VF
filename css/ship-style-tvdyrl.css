@@ -1,0 +1,385 @@
+/* Fondo inspirado en hangares espaciales */
+body {
+  margin: 0;
+  background-image: url("../bg/HangarBG.png");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-attachment: fixed;
+  background-size: cover;
+  font-family: 'Anta', sans-serif;
+  color: #e0e0e0;
+  overflow: hidden;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Botón BACK en esquina superior izquierda */
+.back-button {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 250, 0.2);
+  color: #fff;
+  text-shadow: 1px 1px 2px black, -1px -1px 2px black;
+  font-family: 'Anta', sans-serif;
+  font-size: 15px;
+  padding: 8px 16px;
+  border: 1px solid #fff;
+  border-radius: 7px;
+  text-decoration: none;
+  z-index: 1001;
+}
+.back-button:hover {
+  background: rgba(0, 0, 250, 0.9);
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+}
+
+/* Botón INFO (mismo estilo que back-button, arriba a la derecha) */
+.info-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 250, 0.2);
+  color: #fff;
+  text-shadow: 1px 1px 2px black, -1px -1px 2px black;
+  font-family: 'Anta', sans-serif;
+  font-size: 15px;
+  padding: 8px 16px;
+  border: 1px solid #fff;
+  border-radius: 7px;
+  z-index: 1001;
+  cursor: pointer;
+}
+.info-button:hover {
+  background: rgba(0, 0, 250, 0.9);
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+}
+
+/* Modelo con acabado metálico y sombreado suave */
+a-entity[obj-model] {
+  material: metalness: 0.7;
+  roughness: 0.3;
+  color: #c0c0c0;
+  shadow: true;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Iluminación direccional tipo hangar */
+a-light[type="directional"] {
+  color: #ffffff;
+  intensity: 1.2;
+  castShadow: true;
+}
+
+/* Iluminación ambiental tenue */
+a-light[type="ambient"] {
+  color: #444;
+  intensity: 0.3;
+}
+
+/* Cámara con estilo HUD */
+a-entity[camera] {
+  border: 2px solid rgba(0, 255, 255, 0.2);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
+}
+
+/* Animación sutil al rotar */
+a-entity[obj-model]:hover {
+  transform: scale(1.02);
+  -webkit-transform: scale(1.02);
+  filter: brightness(1.1);
+}
+
+/* Ajustes para pantallas pequeñas */
+@media (max-width: 600px) {
+  a-scene {
+    width: 100vw;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .info-window {
+    width: 90vw;
+    height: 50.625vw; /* Proporción 16:9 */
+    padding: 10px;
+  }
+  .info-content {
+    font-size: 14px;
+  }
+  .info-content h2 {
+    font-size: 18px;
+  }
+}
+
+/* Contenedor WASD en esquina inferior izquierda */
+.wasd-controls {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, 40px);
+  grid-template-rows: repeat(2, 40px);
+  gap: 5px;
+  z-index: 1001;
+}
+
+/* Botones WASD con estilo BACK */
+.wasd-button {
+  background: rgba(0, 0, 250, 0.2);
+  color: #fff;
+  text-shadow: 1px 1px 2px black, -1px -1px 2px black;
+  font-family: 'Anta', sans-serif;
+  font-size: 15px;
+  border: 1px solid #fff;
+  border-radius: 7px;
+  text-align: center;
+  line-height: 40px;
+  user-select: none;
+  transition: background 0.2s ease;
+}
+
+/* Hover opcional para WASD */
+.wasd-button:hover {
+  background: rgba(0, 0, 250, 0.9);
+}
+
+/* Estado activo para WASD */
+.wasd-button.active {
+  background: rgba(0, 0, 250, 0.9);
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+}
+
+/* Contenedor para botones de modelos (F, G, B) en esquina inferior derecha */
+.model-controls {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, 60px); /* Aumentado para "F (1)" */
+  gap: 1px;
+  z-index: 1001;
+}
+
+/* Estilo para botones de modelos (F (1), G (2), B (3)) */
+.model-button {
+  background: rgba(0, 0, 250, 0.2);
+  color: #fff;
+  text-shadow: 1px 1px 2px black, -1px -1px 2px black;
+  font-family: 'Anta', sans-serif;
+  font-size: 15px;
+  border: 1px solid #fff;
+  border-radius: 7px;
+  text-align: center;
+  line-height: 40px;
+  user-select: none;
+  transition: background 0.2s ease;
+  width: 55px;
+  height: 40px;
+}
+
+/* Hover desactivado para botones F, G, B */
+.model-button:hover {
+  background: rgba(0, 0, 250, 0.9);
+}
+
+/* Estado activo para botones F, G, B */
+.model-button.active {
+  background: rgba(0, 0, 250, 0.9);
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+}
+
+/* Instrucciones fijas en la UI, centradas abajo */
+.instructions {
+  position: fixed;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  text-shadow: 1px 1px 2px black, -1px -1px 2px black;
+  background: rgba(0, 0, 250, 0.2);
+  padding: 10px 20px;
+  border: 1px solid #fff;
+  border-radius: 7px;
+  font-family: 'Anta', sans-serif;
+  font-size: 16px;
+  z-index: 1001;
+  white-space: nowrap;
+}
+
+/* Controles de iluminación direccional */
+.light-controls {
+  position: fixed;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  background: rgba(0, 0, 250, 0.2);
+  padding: 12px 16px;
+  border: 1px solid #fff;
+  border-radius: 7px;
+  font-family: 'Anta', sans-serif;
+  color: #fff;
+  text-shadow: 1px 1px 2px black, -1px -1px 2px black;
+  z-index: 1001;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.light-controls label {
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.light-controls input[type="range"],
+.light-controls input[type="color"] {
+  margin-top: 4px;
+  width: 100%;
+}
+
+/* Ocultar el botón de VR/pantalla completa de A-Frame */
+.a-enter-vr {
+  display: none !important;
+}
+
+/* Ventana INFO */
+.info-window {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
+  width: 80vw;
+  height: 45vw;
+  max-width: 1600px;
+  max-height: 900px;
+  background: rgba(0, 0, 250, 0.2);
+  border: 1px solid #fff;
+  border-radius: 7px;
+  z-index: 1002;
+  overflow: hidden;
+  font-family: 'Anta', sans-serif;
+  color: #fff;
+  padding: 30px 20px 20px 20px;
+  box-sizing: border-box;
+}
+
+/* Líneas horizontales CRT */
+.info-window::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.1) 2px,
+    rgba(0, 0, 0, 0.1) 4px
+  );
+  pointer-events: none;
+}
+
+/* Efecto de barrido CRT */
+.info-window::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 40%,
+    rgba(255, 255, 255, 0.2) 60%,
+    transparent 30%,
+    transparent 100%
+  );
+  animation: crt-scan 2.5s linear infinite;
+  -webkit-animation: crt-scan 2.5s linear infinite;
+}
+@keyframes crt-scan {
+  0% { transform: translateY(-100%); -webkit-transform: translateY(-100%); }
+  100% { transform: translateY(100%); -webkit-transform: translateY(100%); }
+}
+
+/* Contenido de la ventana */
+.info-content {
+  position: relative;
+  z-index: 1;
+  font-size: 13.8px;
+  line-height: 0.5;
+  max-height: 100%;
+  overflow-y: auto;
+  text-shadow: -1.5px 1.5px 0.5px black, -0.5px 0.5px 0.5px black;
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+}
+
+.info-content p.section-title {
+  font-weight: regular;
+  margin-top: 20px;
+  padding-bottom: 4px;
+  text-decoration-line: underline;
+}
+
+.info-content h2 {
+  font-weight: regular;
+  font-size: 20px;
+  margin-bottom: 0.5px;
+  text-shadow: -1.5px 1.5px 0.5px black, -0.5px 0.5px 0.5px black;
+  text-align: justify;
+  text-decoration-line: underline;
+}
+
+/* Botón de cerrar ventana */
+.close-info {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: none;
+  border: 1px solid #fff;
+  border-radius: 4px;
+  color: #fff;
+  font-family: 'Anta', sans-serif;
+  font-size: 10px;
+  padding: 3px 5px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  z-index: 1003;
+}
+
+.audio-log-button {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  background: none;
+  border: 1px solid #fff;
+  border-radius: 4px;
+  color: #fff;
+  font-family: 'Anta', sans-serif;
+  font-size: 10px;
+  padding: 3px 5px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  z-index: 1003;
+}
+
+
+.close-info:hover {
+  background: rgba(0, 0, 250, 0.2);
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+}
+
+.audio-log-button:hover {
+  background: rgba(0, 0, 250, 0.2);
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+}
