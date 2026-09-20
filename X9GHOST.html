@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>360 X-9 GHOST</title>
+  <link rel="icon" type="image/x-icon" href="img/vfavicon.png">
+
+  <!-- A-Frame 1.6.0 -->
+  <script src="js/aframe.min.js"></script>
+
+  <!-- Estilo externo inspirado en Miyatake -->
+  <link rel="stylesheet" href="css/ship-style-macplus.css">
+
+  <!-- Fuente retro-futurista -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+
+  <!-- Componente personalizado para rotación y manejo de teclas -->
+  <script>
+    // Componente para deshabilitar WebXR
+    AFRAME.registerComponent('block-webxr', {
+      init: function () {
+        this.el.sceneEl.setAttribute('vr-mode-ui', {
+          enabled: false,
+          keyboardShortcuts: false,
+          enterVRButton: 'none'
+        });
+        this.el.sceneEl.renderer.xr.enabled = false;
+      }
+    });
+
+    // Manejador global para teclas '1', '2', '3'
+    window.addEventListener('keydown', function(event) {
+      const key = event.key.toLowerCase();
+      // Bloquear F11 para evitar acciones de pantalla completa
+      if (key === 'f11' || event.keyCode === 122) {
+        event.preventDefault();
+        console.log(`Tecla ${key} capturada en window...`); // Depuración
+        return false;
+      }
+      // Manejo de 1, 2, 3, mapeando a botones visuales F, G, B
+      if (['1', '2', '3'].includes(key)) {
+        event.preventDefault();
+        console.log(`Tecla ${key} capturada en window...`); // Depuración
+        if (key === '1') {
+          showModel(1);
+          iluminarBoton('f', true); // Mostrar como F en la UI
+        } else if (key === '2') {
+          showModel(2);
+          iluminarBoton('g', true); // Mostrar como G en la UI
+        } else if (key === '3') {
+          showModel(3);
+          iluminarBoton('b', true); // Mostrar como B en la UI
+        }
+      }
+    }, { capture: true });
+
+    // Manejador para el botón Back en modo pantalla completa
+    document.addEventListener('fullscreenchange', function() {
+      const backButton = document.querySelector('.back-button');
+      if (document.fullscreenElement) {
+        backButton.style.pointerEvents = 'auto';
+        backButton.style.zIndex = '1000';
+      } else {
+        backButton.style.pointerEvents = 'auto';
+        backButton.style.zIndex = '10';
+      }
+      console.log('Evento fullscreenchange disparado'); // Depuración
+    });
+
+    AFRAME.registerComponent('wasd-rotation', {
+      schema: { speed: { type: 'number', default: 100 } },
+      init: function () {
+        this.keys = {};
+        const initialRotation = this.el.getAttribute('rotation');
+        this.rotation = { x: initialRotation.x, y: initialRotation.y };
+
+        this.onKeyDown = (event) => {
+          const key = event.key.toLowerCase();
+          if (['w', 'a', 's', 'd'].includes(key)) {
+            this.keys[key] = true;
+            iluminarBoton(key, true);
+          }
+        };
+        this.onKeyUp = (event) => {
+          const key = event.key.toLowerCase();
+          if (['w', 'a', 's', 'd'].includes(key)) {
+            this.keys[key] = false;
+            iluminarBoton(key, false);
+          }
+        };
+        document.addEventListener('keydown', this.onKeyDown);
+        document.addEventListener('keyup', this.onKeyUp);
+      },
+      tick: function (time, deltaTime) {
+        const dt = deltaTime / 1000;
+        let rotated = false;
+
+        if (this.keys['a']) { this.rotation.y += this.data.speed * dt; rotated = true; }
+        if (this.keys['d']) { this.rotation.y -= this.data.speed * dt; rotated = true; }
+        if (this.keys['w']) { this.rotation.x += this.data.speed * dt; rotated = true; }
+        if (this.keys['s']) { this.rotation.x -= this.data.speed * dt; rotated = true; }
+
+        if (rotated) {
+          this.el.setAttribute('rotation', `${this.rotation.x} ${this.rotation.y} 0`);
+        }
+      },
+      remove: function () {
+        document.removeEventListener('keydown', this.onKeyDown);
+        document.removeEventListener('keyup', this.onKeyUp);
+      }
+    });
+
+    // Función para iluminar/desiluminar botones WASD y F, G, B
+    function iluminarBoton(key, activo) {
+      const map = {
+        w: 'btnW',
+        a: 'btnA',
+        s: 'btnS',
+        d: 'btnD',
+        f: 'btnF', // Mapeado a tecla 1
+        g: 'btnG', // Mapeado a tecla 2
+        b: 'btnB'  // Mapeado a tecla 3
+      };
+      const id = map[key];
+      if (!id) return;
+      const btn = document.getElementById(id);
+      if (btn) {
+        if (activo) btn.classList.add('active');
+        else btn.classList.remove('active');
+      }
+      if (['f', 'g', 'b'].includes(key) && activo) {
+        ['btnF', 'btnG', 'btnB'].forEach(btnId => {
+          if (btnId !== id) document.getElementById(btnId).classList.remove('active');
+        });
+      }
+    }
+
+    // Función para cambiar modelos
+    function showModel(modelNumber) {
+      document.getElementById('model1').setAttribute('visible', false);
+      document.getElementById('model2').setAttribute('visible', false);
+      document.getElementById('model3').setAttribute('visible', false);
+      document.getElementById(`model${modelNumber}`).setAttribute('visible', true);
+      const currentRotation = document.querySelector('a-entity[visible=true]').getAttribute('rotation');
+      document.getElementById(`model${modelNumber}`).setAttribute('rotation', currentRotation);
+      iluminarBoton(['f', 'g', 'b'][modelNumber - 1], true); // Usar f, g, b para botones visuales
+    }
+
+    // Funcionalidad para el botón INFO y la ventana
+    window.onload = function() {
+      const infoButton = document.getElementById('info-button');
+      const infoWindow = document.getElementById('info-window');
+      const closeInfo = document.getElementById('close-info');
+
+      infoButton.addEventListener('click', function(event) {
+        event.stopPropagation();
+        console.log('Botón INFO clicado'); // Depuración
+        infoWindow.style.display = infoWindow.style.display === 'block' ? 'none' : 'block';
+      });
+
+      closeInfo.addEventListener('click', function(event) {
+        event.stopPropagation();
+        console.log('Botón CLOSE clicado'); // Depuración
+        infoWindow.style.display = 'none';
+      });
+
+      infoWindow.addEventListener('click', function(event) {
+        if (event.target === infoWindow) {
+          event.stopPropagation();
+          console.log('Ventana INFO clicada'); // Depuración
+          infoWindow.style.display = 'none';
+        }
+      });
+
+		// Funcionalidad Audio Log
+  const audioButton = document.getElementById('audio-log-button');
+  const audioElement = document.getElementById('audio-log');
+  let audioActivo = false;
+
+  audioButton.addEventListener('click', function () {
+    audioActivo = !audioActivo;
+    if (audioActivo) {
+      audioElement.play();
+      audioButton.textContent = 'Audio Log ON';
+    } else {
+      audioElement.pause();
+      audioElement.currentTime = 0;
+      audioButton.textContent = 'Audio Log OFF';
+    }
+    console.log(`Audio Log ${audioActivo ? 'activado' : 'desactivado'}`);
+  });
+
+  infoButton.addEventListener('click', function () {
+    audioElement.pause();
+    audioElement.currentTime = 0;
+    audioActivo = false;
+    audioButton.textContent = 'Audio Log OFF';
+  });
+};
+  </script>
+</head>
+<body>
+  <!-- Botón Back -->
+  <a href="MacrossPlus.html" class="back-button" id="back-button">BACK</a>
+
+  <!-- Botón INFO -->
+  <button class="info-button" id="info-button">INFO</button>
+
+  <!-- Ventana INFO con texto técnico placeholder -->
+  <div class="info-window" id="info-window">
+    <button class="close-info" id="close-info">X</button>
+	<button class="audio-log-button" id="audio-log-button">Audio Log OFF</button>
+    <audio id="audio-log" src="snd/X9 Ghost History Audio.ogg"></audio>
+    <div class="info-content">
+      <h2>X-9 Ghost - Technical Data</h2>
+      
+      <p>Equipment Type: all environment unmanned spaceplane fighter.</p>
+      <p>Government: U.N. Spacy.</p>
+      <p>Manufacturer: U.N. Spacy.</p>
+      <p>Introduction: March 2040.</p>
+      <p>Operational Deployment: March 2040.</p>
+      <p>Accommodation: none (AI controlled)</p>
+      
+      <p class="section-title">Dimensions:</p>
+      <p>Approx. length 14.0 meters</p>
+      <p>Power Plant: Thermonuclear reaction turbine engine block.</p>
+      
+      <p class="section-title">Guns:</p>
+      <p>5 x laser guns (internally mounted to the left, right, and underside of the fuselage); independent or tandem-use is possible.</p>
+      <p>Unknown number x chaff dispeners.</p>
+      
+      <p class="section-title">Bombs & Missiles:</p>
+      <p>1 x ventral missile launcher with 29 x high-maneuverability missiles (each missile can adjust the firing angle, forward or back, by 15-degrees).</p>
+	  
+	  <p class="section-title">Optional Armament:</p>
+	  <p>Super Part augmentative weapon system with 4 x micro-missile launchers (mounted in booster pods of Super parts).</p>
+      
+      <p class="section-title">Brief History:</p>
+      <p>The X-9 Ghost (nicknamed "Ghost Bird") was developed as an unmanned combat aerial vehicle for use within and outside of atmosphere.</p>
+	  <p>The goal of the X-9 project was to replace manned variable fighter aircraft with unmanned AI-controlled craft capable of achieving superior performance.</p>
+      <p>The X-9 possesses incredible maneuverability and firepower without the restrictions of a living pilot and boasts performance that exceeds in all areas the next generation variable fighters.</p>
+      <p>Furthermore, the Sharon-type artificial intelligence, a completely autonomous-control-type AI applied from the Sharon Apple core, was mounted and demonstrated</p>
+      <p>combat ability unlike earlier Ghosts equipped with conventional semi-autonomous AI (such as the QF-3000E Ghost).</p> 
+      <p>The X-9 was to be publicly unveiled at the 30th Anniversary of the Space War One Armistice in Macross City on Earth.</p>
+	  <p>Unfortunately, virtual singing idol Sharon Apple was also implanted with a bio-neural chip and became mentally unstable.</p> 
+      <p>After subduing the people of Macross City with high-frequency light and sound, Sharon Apple seized control of the X-9 Ghost computer</p> 
+      <p>and sent it to destroy the YF-19 piloted by Isamu Dyson and the YF-21 piloted by Guld Bowman.</p>
+	  <p>The X-9 proved more than a match for both the YF-19 and the YF-21 and able to dogfight the two fighters at once.</p>
+      <p>The X-9 Ghost delivered several hits upon both fighters while remaining undamaged yet it was eventually defeated by Guld Bowman, but only at the cost of Bowman's life in a suicide run.</p>
+	  <p>With the X-9 prototype destroyed and the bio-neural chip scandal exposed in what came to be called the "Sharon Apple Incident," the Ghost project was abandoned.</p>
+      <br>
+    </div>
+  </div>
+
+  <!-- Controles WASD -->
+  <div class="wasd-controls">
+    <div></div>
+    <div class="wasd-button" id="btnW">W</div>
+    <div></div>
+    <div class="wasd-button" id="btnA">A</div>
+    <div class="wasd-button" id="btnS">S</div>
+    <div class="wasd-button" id="btnD">D</div>
+  </div>
+
+  <!-- Botones para cambiar modelos (visuales, no clicables, muestran F (1), G (2), B (3)) -->
+  <div class="model-controls">
+    <button class="model-button" id="btnF">F (1)</button>
+    <button class="model-button" id="btnG">G (2)</button>
+    <button class="model-button" id="btnB">B (3)</button>
+  </div>
+
+  <!-- Instrucciones fijas en la UI -->
+  <div class="instructions">
+    Use keys 1, 2, 3 to change models (F, G, B on screen)
+  </div>
+
+  <a-scene vr-mode-ui="enterVRButton: none; keyboardShortcuts: false; enabled: false" block-webxr>
+    <!-- Assets de los modelos -->
+    <a-assets>
+      <a-asset-item id="modelo1-obj" src="model/X9Ghost.obj"></a-asset-item>
+      <a-asset-item id="modelo1-mtl" src="model/X9Ghost.mtl"></a-asset-item>
+	  <a-asset-item id="modelo2-obj" src="model/X9Ghost.obj"></a-asset-item>
+      <a-asset-item id="modelo2-mtl" src="model/X9Ghost.mtl"></a-asset-item>
+      <a-asset-item id="modelo3-obj" src="model/X9Ghost.obj"></a-asset-item>
+      <a-asset-item id="modelo3-mtl" src="model/X9Ghost.mtl"></a-asset-item>
+    </a-assets>
+
+    <!-- Modelos con rotación inicial y control manual -->
+    <a-entity
+      id="model1"
+      obj-model="obj: #modelo1-obj; mtl: #modelo1-mtl"
+      position="0 0.5 -7.3"
+      scale="50 50 50"
+      rotation="270 90 0"
+      visible="true"
+      wasd-rotation>
+    </a-entity>
+    <a-entity
+      id="model2"
+      obj-model="obj: #modelo2-obj; mtl: #modelo2-mtl"
+      position="0 0.5 -7.3"
+      scale="50 50 50"
+      rotation="270 90 0"
+      visible="false"
+      wasd-rotation>
+    </a-entity>
+    <a-entity
+      id="model3"
+      obj-model="obj: #modelo3-obj; mtl: #modelo3-mtl"
+      position="0 0.5 -7.3"
+      scale="50 50 50"
+      rotation="270 90 0"
+      visible="false"
+      wasd-rotation>
+    </a-entity>
+
+    <!-- Iluminación estilo hangar -->
+    <a-light id="mainLight" type="directional" position="1 1 1" intensity="1.2" color="#ffffff"></a-light>
+    <a-light type="ambient" intensity="0.3" color="#444"></a-light>
+
+    <!-- Cámara con controles -->
+    <a-entity camera="active: true" look-controls wasd-controls position="0 1.6 0" data-aframe-default-camera></a-entity>
+
+    <!-- Controles de iluminación direccional -->
+    <div class="light-controls">
+      <label>Light Intensity:
+        <input type="range" id="lightIntensity" min="0" max="2" step="0.1" value="1.2">
+      </label>
+      <label>Light Color:
+        <input type="color" id="lightColor" value="#ffffff">
+      </label>
+      <label>Light Position X:
+        <input type="range" id="lightPosX" min="-10" max="10" step="0.1" value="1">
+      </label>
+      <label>Light Position Y:
+        <input type="range" id="lightPosY" min="-10" max="10" step="0.1" value="1">
+      </label>
+      <label>Light Position Z:
+        <input type="range" id="lightPosZ" min="-10" max="10" step="0.1" value="1">
+      </label>
+    </div>
+
+    <!-- Script de interacción para controles de iluminación -->
+    <script>
+      const light = document.getElementById('mainLight');
+      const updateLight = () => {
+        const x = document.getElementById('lightPosX').value;
+        const y = document.getElementById('lightPosY').value;
+        const z = document.getElementById('lightPosZ').value;
+        const intensity = document.getElementById('lightIntensity').value;
+        const color = document.getElementById('lightColor').value;
+
+        light.setAttribute('position', `${x} ${y} ${z}`);
+        light.setAttribute('intensity', intensity);
+        light.setAttribute('color', color);
+        console.log('Sliders de iluminación actualizados'); // Depuración
+      };
+
+      ['lightPosX', 'lightPosY', 'lightPosZ', 'lightIntensity', 'lightColor'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateLight);
+      });
+    </script>
+  </a-scene>
+</body>
+</html>

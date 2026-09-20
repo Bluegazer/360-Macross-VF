@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Explore iconic Variable Fighters from the Macross series in this gallery.">
+    <meta name="keywords" content="Macross, Variable Fighters, VF-1A, VF-1S, anime, mecha">
+    <title>Macross Ships Gallery</title>
+    <link rel="icon" type="image/x-icon" href="img/vfavicon.png">
+    <link rel="stylesheet" href="css/style-menu-main.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <h1 class="text-shadow">MACROSS SHIPS GALLERY</h1>
+		<h1 class="text-shadow">Ver. 1.0</h1>
+    </header>
+
+    <!-- Main Content -->
+    <div id="text" class="text-shadow">
+        Welcome to the Macross Ships Gallery. Explore the most iconic Variable Fighters and vehicles in this gallery.
+        Below, select the series and browse the variable fighters and other ships.
+    </div>
+
+    <!-- Thumbnail Gallery -->
+    <div class="gallery-container">
+        <div class="gallery">
+            <div class="gallery-item">
+                <a href="MacrossTVDYRL.html">
+                    <img src="thumb/MacrossTVADYRL.png" alt="Macross TVA DYRL" loading="lazy" onerror="this.src='thumb/MacrossTVADYRL.png'">
+                    <span class="gallery-name">Macross TV / DYRL</span>
+                </a>
+            </div>
+            <div class="gallery-item">
+                <a href="Flashback2012.html">
+                    <img src="thumb/Flashback2012.png" alt="Flashback 2012" loading="lazy" onerror="this.src='thumb/Flashback2012.png'">
+                    <span class="gallery-name">Flashback 2012</span>
+                </a>
+            </div>
+            <div class="gallery-item">
+                <a href="MacrossZero.html">
+                    <img src="thumb/MacrossZero.png" alt="Macross Zero" loading="lazy" onerror="this.src='thumb/MacrossZero.png'">
+                    <span class="gallery-name">Macross Zero</span>
+                </a>
+            </div>
+            <div class="gallery-item">
+                <a href="MacrossPlus.html">
+                    <img src="thumb/macplus.png" alt="Macross Plus" loading="lazy" onerror="this.src='thumb/macplus.png'">
+                    <span class="gallery-name">Macross Plus</span>
+                </a>
+            </div>
+            <div class="gallery-item">
+                <a href="Macross7.html">
+                    <img src="thumb/macross7.png" alt="Macross 7" loading="lazy" onerror="this.src='thumb/macross7.png'">
+                    <span class="gallery-name">Macross 7</span>
+                </a>
+            </div>
+            <div class="gallery-item">
+                <a href="MacrossIILA.html">
+                    <img src="thumb/macrossIILA.png" alt="Macross II Lovers Again" loading="lazy" onerror="this.src='thumb/macrossIILA.png'">
+                    <span class="gallery-name">Macross II Lovers Again</span>
+                </a>
+            </div>
+            <div class="gallery-item">
+                <a href="MacrossFrontier.html">
+                    <img src="thumb/macfrontier.png" alt="Macross Frontier" loading="lazy" onerror="this.src='thumb/macfrontier.png'">
+                    <span class="gallery-name">Macross Frontier</span>
+                </a>
+            </div>
+            <div class="gallery-item">
+                <a href="MacrossDelta.html">
+                    <img src="thumb/macdelta.png" alt="Macross Delta" loading="lazy" onerror="this.src='thumb/macdelta.png'">
+                    <span class="gallery-name">Macross Delta</span>
+                </a>
+            </div>
+                </a>
+            </div>
+        </div>
+    </div>
+	
+	<!-- Navigation -->
+    <nav role="navigation" class="nav-bottom">
+        <ul>
+            <li><a href="#" class="text-shadow" id="close-button">CLOSE GALLERY</a></li>
+        </ul>
+    </nav>	
+
+    <!-- Creative Commons License -->
+    <div class="cc-license text-shadow">
+        <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">
+            Content licensed under CC BY-NC-SA 4.0
+            <img src="https://i.creativecommons.org/l/by-nc-sa/4.0/80x15.png" alt="Creative Commons BY-NC-SA 4.0 License">
+        </a>
+    </div>
+
+    <!-- JavaScript to trigger close.bat and close browser -->
+    <script>
+        document.getElementById('close-button').addEventListener('click', function(event) {
+            event.preventDefault();
+            fetch('http://localhost:8000/close', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ action: 'runCloseBat' })
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log('Server response:', data);
+                setTimeout(() => {
+                    window.close();
+                }, 1000);
+            })
+            .catch(error => {
+                console.warn('Servidor cerrado antes de responder. Esto es esperado.');
+                setTimeout(() => {
+                    window.close();
+                }, 500);
+            });
+        });
+    </script>
+	
+
+</body>
+</html>

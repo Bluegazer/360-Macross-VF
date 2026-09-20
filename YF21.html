@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>360 YF-21</title>
+  <link rel="icon" type="image/x-icon" href="img/vfavicon.png">
+
+  <!-- A-Frame 1.6.0 -->
+  <script src="js/aframe.min.js"></script>
+
+  <!-- Estilo externo inspirado en Miyatake -->
+  <link rel="stylesheet" href="css/ship-style-macplus.css">
+
+  <!-- Fuente retro-futurista -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+
+  <!-- Componente personalizado para rotación y manejo de teclas -->
+  <script>
+    // Componente para deshabilitar WebXR
+    AFRAME.registerComponent('block-webxr', {
+      init: function () {
+        this.el.sceneEl.setAttribute('vr-mode-ui', {
+          enabled: false,
+          keyboardShortcuts: false,
+          enterVRButton: 'none'
+        });
+        this.el.sceneEl.renderer.xr.enabled = false;
+      }
+    });
+
+    // Manejador global para teclas '1', '2', '3'
+    window.addEventListener('keydown', function(event) {
+      const key = event.key.toLowerCase();
+      // Bloquear F11 para evitar acciones de pantalla completa
+      if (key === 'f11' || event.keyCode === 122) {
+        event.preventDefault();
+        console.log(`Tecla ${key} capturada en window...`); // Depuración
+        return false;
+      }
+      // Manejo de 1, 2, 3, mapeando a botones visuales F, G, B
+      if (['1', '2', '3'].includes(key)) {
+        event.preventDefault();
+        console.log(`Tecla ${key} capturada en window...`); // Depuración
+        if (key === '1') {
+          showModel(1);
+          iluminarBoton('f', true); // Mostrar como F en la UI
+        } else if (key === '2') {
+          showModel(2);
+          iluminarBoton('g', true); // Mostrar como G en la UI
+        } else if (key === '3') {
+          showModel(3);
+          iluminarBoton('b', true); // Mostrar como B en la UI
+        }
+      }
+    }, { capture: true });
+
+    // Manejador para el botón Back en modo pantalla completa
+    document.addEventListener('fullscreenchange', function() {
+      const backButton = document.querySelector('.back-button');
+      if (document.fullscreenElement) {
+        backButton.style.pointerEvents = 'auto';
+        backButton.style.zIndex = '1000';
+      } else {
+        backButton.style.pointerEvents = 'auto';
+        backButton.style.zIndex = '10';
+      }
+      console.log('Evento fullscreenchange disparado'); // Depuración
+    });
+
+    AFRAME.registerComponent('wasd-rotation', {
+      schema: { speed: { type: 'number', default: 100 } },
+      init: function () {
+        this.keys = {};
+        const initialRotation = this.el.getAttribute('rotation');
+        this.rotation = { x: initialRotation.x, y: initialRotation.y };
+
+        this.onKeyDown = (event) => {
+          const key = event.key.toLowerCase();
+          if (['w', 'a', 's', 'd'].includes(key)) {
+            this.keys[key] = true;
+            iluminarBoton(key, true);
+          }
+        };
+        this.onKeyUp = (event) => {
+          const key = event.key.toLowerCase();
+          if (['w', 'a', 's', 'd'].includes(key)) {
+            this.keys[key] = false;
+            iluminarBoton(key, false);
+          }
+        };
+        document.addEventListener('keydown', this.onKeyDown);
+        document.addEventListener('keyup', this.onKeyUp);
+      },
+      tick: function (time, deltaTime) {
+        const dt = deltaTime / 1000;
+        let rotated = false;
+
+        if (this.keys['a']) { this.rotation.y += this.data.speed * dt; rotated = true; }
+        if (this.keys['d']) { this.rotation.y -= this.data.speed * dt; rotated = true; }
+        if (this.keys['w']) { this.rotation.x += this.data.speed * dt; rotated = true; }
+        if (this.keys['s']) { this.rotation.x -= this.data.speed * dt; rotated = true; }
+
+        if (rotated) {
+          this.el.setAttribute('rotation', `${this.rotation.x} ${this.rotation.y} 0`);
+        }
+      },
+      remove: function () {
+        document.removeEventListener('keydown', this.onKeyDown);
+        document.removeEventListener('keyup', this.onKeyUp);
+      }
+    });
+
+    // Función para iluminar/desiluminar botones WASD y F, G, B
+    function iluminarBoton(key, activo) {
+      const map = {
+        w: 'btnW',
+        a: 'btnA',
+        s: 'btnS',
+        d: 'btnD',
+        f: 'btnF', // Mapeado a tecla 1
+        g: 'btnG', // Mapeado a tecla 2
+        b: 'btnB'  // Mapeado a tecla 3
+      };
+      const id = map[key];
+      if (!id) return;
+      const btn = document.getElementById(id);
+      if (btn) {
+        if (activo) btn.classList.add('active');
+        else btn.classList.remove('active');
+      }
+      if (['f', 'g', 'b'].includes(key) && activo) {
+        ['btnF', 'btnG', 'btnB'].forEach(btnId => {
+          if (btnId !== id) document.getElementById(btnId).classList.remove('active');
+        });
+      }
+    }
+
+    // Función para cambiar modelos
+    function showModel(modelNumber) {
+      document.getElementById('model1').setAttribute('visible', false);
+      document.getElementById('model2').setAttribute('visible', false);
+      document.getElementById('model3').setAttribute('visible', false);
+      document.getElementById(`model${modelNumber}`).setAttribute('visible', true);
+      const currentRotation = document.querySelector('a-entity[visible=true]').getAttribute('rotation');
+      document.getElementById(`model${modelNumber}`).setAttribute('rotation', currentRotation);
+      iluminarBoton(['f', 'g', 'b'][modelNumber - 1], true); // Usar f, g, b para botones visuales
+    }
+
+    // Funcionalidad para el botón INFO y la ventana
+    window.onload = function() {
+      const infoButton = document.getElementById('info-button');
+      const infoWindow = document.getElementById('info-window');
+      const closeInfo = document.getElementById('close-info');
+
+      infoButton.addEventListener('click', function(event) {
+        event.stopPropagation();
+        console.log('Botón INFO clicado'); // Depuración
+        infoWindow.style.display = infoWindow.style.display === 'block' ? 'none' : 'block';
+      });
+
+      closeInfo.addEventListener('click', function(event) {
+        event.stopPropagation();
+        console.log('Botón CLOSE clicado'); // Depuración
+        infoWindow.style.display = 'none';
+      });
+
+      infoWindow.addEventListener('click', function(event) {
+        if (event.target === infoWindow) {
+          event.stopPropagation();
+          console.log('Ventana INFO clicada'); // Depuración
+          infoWindow.style.display = 'none';
+        }
+      });
+
+		// Funcionalidad Audio Log
+  const audioButton = document.getElementById('audio-log-button');
+  const audioElement = document.getElementById('audio-log');
+  let audioActivo = false;
+
+  audioButton.addEventListener('click', function () {
+    audioActivo = !audioActivo;
+    if (audioActivo) {
+      audioElement.play();
+      audioButton.textContent = 'Audio Log ON';
+    } else {
+      audioElement.pause();
+      audioElement.currentTime = 0;
+      audioButton.textContent = 'Audio Log OFF';
+    }
+    console.log(`Audio Log ${audioActivo ? 'activado' : 'desactivado'}`);
+  });
+
+  infoButton.addEventListener('click', function () {
+    audioElement.pause();
+    audioElement.currentTime = 0;
+    audioActivo = false;
+    audioButton.textContent = 'Audio Log OFF';
+  });
+};
+  </script>
+</head>
+<body>
+  <!-- Botón Back -->
+  <a href="MacrossPlus.html" class="back-button" id="back-button">BACK</a>
+
+  <!-- Botón INFO -->
+  <button class="info-button" id="info-button">INFO</button>
+
+  <!-- Ventana INFO con texto técnico placeholder -->
+  <div class="info-window" id="info-window">
+    <button class="close-info" id="close-info">X</button>
+	<button class="audio-log-button" id="audio-log-button">Audio Log OFF</button>
+    <audio id="audio-log" src="snd/YF21 History Audio.ogg"></audio>
+    <div class="info-content">
+      <h2>YF-21 - Technical Data</h2>
+      
+      <p>Equipment Type: UNAF/UNS prototype main advanced variable fighter.</p>
+      <p>Government: U.N. Air Force, U.N. Spacy</p>
+      <p>Manufacturer: General Galaxy.</p>
+      <p>Introduction: 2034.</p>
+      <p>Operational Deployment: 2039.</p>
+      <p>Accommodation: pilot only in General Galaxy/Marty & Beck specially-developed g-endurance zero/zero ejection seat</p>
+	  (pilot wears Tactical Life Support System with upper and lower g-suits and pressure breathing);</p>
+	  <p>YF-21 No. 2 features completely shielded, pressurized cockpit (minimal external view through overhead spherical canopy/two side panels).</p>
+      
+      <p class="section-title">Dimensions:</p>
+      <p>Battroid Mode: unknown, estimated height 15.5 meters.</p>
+      <p>Fighter Mode: wingspan 15.36; height 4.04 meters; length 19.62 meters.</p>
+      <p>GERWALK Mode: wingspan 15.36 meters.</p>
+      <p>Mass: empty 9.55 metric tons; max T-O mass in atmosphere 39.207 metric tons; max lift-off mass in space with fold booster 48.305 metric tons</p>
+      <p>Structure: SWAG energy conversion armor, low observables stealth configuration and construction.</p>
+      <p>Power Plant: two Shinnakasu Industry/P&W/Roice FF-2450B thermonuclear engines.</p>
+      
+      <p class="section-title">Guns:</p>
+      <p>1 x fixed rear Erlikon AAB-7(.5) super-miniature anti-aircraft laser turret (mounted center dorsal section in Fighter/GERWALK mode, becomes head turret in Battroid mode).</p>
+      <p>2 x semi-fixed internal Mauler REB-22 laser beam guns featuring forward/rearward barrels (mounted underneath tail stabilizers in Fighter mode, lower arms in GERWALK/Battroid modes).</p>
+	  <p>2 x Howard/General GV-17L new standard cartridge-less Gatling gun pods featuring retractable grip/stealth covers in Four hard point weapon stations</p>
+	  <p>(mounted left/right ventral fuselage in Fighter mode or leg storage bay cover panels and/or manipulators in GERWALK/Battroid modes.</p>
+	  <p>1 x fixed Howard PBS-03F fighter-carried pin-point barrier system (due to engine output restrictions the pin-point barrier can only be used in Battroid mode).</p>
+	  <p>2 x arm shields (tail stabilizers in fighter mode, lower arm in GERWALK/Battroid modes); function in concert with barrier system.</p>
+      
+      <p class="section-title">Bombs & Missiles:</p>
+      <p>4 x internal Bifors BML-02S YF-21-exclusive all-environment rapid-fire micro-missile launchers featuring exit ports from forward dorsal section to the sides of the engine nacelles</p> 
+	  <p>(mounted in central dorsal section).</p>
+	  
+	  <p class="section-title">Optional Armament:</p>
+	  <p>4 x hard point weapon stations for all-environment FAST Pack weapon packs with micro-missiles</p>
+	  <p>(mounted on arm/tail and hip/underside panels) each capable of equipping 4,000 kg.</p>
+      
+      <p class="section-title">Brief History:</p>
+      <p>The General Galaxy YF-21 was built for the Project Super Nova Advanced Variable Fighter (AVF),a competition for a contract with the United Nations Air Force (UNAF) and United Nations</p>
+	  <p>Spacy (UNS) to replace the older VF-11 Thunderbolt main variable fighter.</p>
+      <p>When the UNAF announced General Galaxy as one of two final demonstration/validation phase contractors, the company produced two prototypes and a ground based avionics test bed.</p>
+      <p>Development on the YF-21 began in 2034 and produced prototype No. 1 for first flight in 2039. However, it was the first flight of the YF-21 prototype No. 2 at New Edwards Test Flight Center</p>
+      <p>on Planet Eden in January 2040 that General Galaxy revealed the true nature of their next generation fighter.</p> 
+      <p>The second prototype eschewed the conventional control cockpit of protoype No. 1 and was integrated with two experimental systems designated brain direct interface system (BDS) and</p>
+	  <p>brain direct image system (BDI) in an attempt to achieve unification of pilot and airframe.</p> 
+      <p>The BDS allowed the pilot of the YF-21 to operate every control at will and BDI offered an unprecedented view around the craft.</p> 
+      <p>This control system improved pilot response time and situational awareness but was only one of two new technologies in the YF-21, the other being an advanced</p>
+	  <p>composite material that could alter wing shape and size.</p>
+      <p>It was clear General Galaxy was determined to win the competition by building a technologically superior craft with an emphasis on high mobility performance.</p>
+      <br>
+    </div>
+  </div>
+
+  <!-- Controles WASD -->
+  <div class="wasd-controls">
+    <div></div>
+    <div class="wasd-button" id="btnW">W</div>
+    <div></div>
+    <div class="wasd-button" id="btnA">A</div>
+    <div class="wasd-button" id="btnS">S</div>
+    <div class="wasd-button" id="btnD">D</div>
+  </div>
+
+  <!-- Botones para cambiar modelos (visuales, no clicables, muestran F (1), G (2), B (3)) -->
+  <div class="model-controls">
+    <button class="model-button" id="btnF">F (1)</button>
+    <button class="model-button" id="btnG">G (2)</button>
+    <button class="model-button" id="btnB">B (3)</button>
+  </div>
+
+  <!-- Instrucciones fijas en la UI -->
+  <div class="instructions">
+    Use keys 1, 2, 3 to change models (F, G, B on screen)
+  </div>
+
+  <a-scene vr-mode-ui="enterVRButton: none; keyboardShortcuts: false; enabled: false" block-webxr>
+    <!-- Assets de los modelos -->
+    <a-assets>
+      <a-asset-item id="modelo1-obj" src="model/yf21F.obj"></a-asset-item>
+      <a-asset-item id="modelo1-mtl" src="model/yf21F.mtl"></a-asset-item>
+      <a-asset-item id="modelo2-obj" src="model/yf21G.obj"></a-asset-item>
+      <a-asset-item id="modelo2-mtl" src="model/yf21G.mtl"></a-asset-item>
+      <a-asset-item id="modelo3-obj" src="model/yf21B.obj"></a-asset-item>
+      <a-asset-item id="modelo3-mtl" src="model/yf21B.mtl"></a-asset-item>
+    </a-assets>
+
+    <!-- Modelos con rotación inicial y control manual -->
+    <a-entity
+      id="model1"
+      obj-model="obj: #modelo1-obj; mtl: #modelo1-mtl"
+      position="0 0 -6"
+      scale="50 50 50"
+      rotation="270 90 0"
+      visible="true"
+      wasd-rotation>
+    </a-entity>
+    <a-entity
+      id="model2"
+      obj-model="obj: #modelo2-obj; mtl: #modelo2-mtl"
+      position="0 0.5 -6"
+      scale="50 50 50"
+      rotation="270 90 0"
+      visible="false"
+      wasd-rotation>
+    </a-entity>
+    <a-entity
+      id="model3"
+      obj-model="obj: #modelo3-obj; mtl: #modelo3-mtl"
+      position="0 0.5 -7.3"
+      scale="50 50 50"
+      rotation="270 90 0"
+      visible="false"
+      wasd-rotation>
+    </a-entity>
+
+    <!-- Iluminación estilo hangar -->
+    <a-light id="mainLight" type="directional" position="1 1 1" intensity="1.2" color="#ffffff"></a-light>
+    <a-light type="ambient" intensity="0.3" color="#444"></a-light>
+
+    <!-- Cámara con controles -->
+    <a-entity camera="active: true" look-controls wasd-controls position="0 1.6 0" data-aframe-default-camera></a-entity>
+
+    <!-- Controles de iluminación direccional -->
+    <div class="light-controls">
+      <label>Light Intensity:
+        <input type="range" id="lightIntensity" min="0" max="2" step="0.1" value="1.2">
+      </label>
+      <label>Light Color:
+        <input type="color" id="lightColor" value="#ffffff">
+      </label>
+      <label>Light Position X:
+        <input type="range" id="lightPosX" min="-10" max="10" step="0.1" value="1">
+      </label>
+      <label>Light Position Y:
+        <input type="range" id="lightPosY" min="-10" max="10" step="0.1" value="1">
+      </label>
+      <label>Light Position Z:
+        <input type="range" id="lightPosZ" min="-10" max="10" step="0.1" value="1">
+      </label>
+    </div>
+
+    <!-- Script de interacción para controles de iluminación -->
+    <script>
+      const light = document.getElementById('mainLight');
+      const updateLight = () => {
+        const x = document.getElementById('lightPosX').value;
+        const y = document.getElementById('lightPosY').value;
+        const z = document.getElementById('lightPosZ').value;
+        const intensity = document.getElementById('lightIntensity').value;
+        const color = document.getElementById('lightColor').value;
+
+        light.setAttribute('position', `${x} ${y} ${z}`);
+        light.setAttribute('intensity', intensity);
+        light.setAttribute('color', color);
+        console.log('Sliders de iluminación actualizados'); // Depuración
+      };
+
+      ['lightPosX', 'lightPosY', 'lightPosZ', 'lightIntensity', 'lightColor'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updateLight);
+      });
+    </script>
+  </a-scene>
+</body>
+</html>
