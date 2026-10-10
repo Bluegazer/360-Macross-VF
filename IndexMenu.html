@@ -81,7 +81,7 @@
 	<!-- Navigation -->
     <nav role="navigation" class="nav-bottom">
         <ul>
-            <li><a href="#" class="text-shadow" id="close-button">CLOSE GALLERY</a></li>
+            <li><a href="https://bitacoramegaroad.github.io/" class="text-shadow" id="close-button">VOLVER A LA BITACORA</a></li>
         </ul>
     </nav>	
 
@@ -92,34 +92,5 @@
             <img src="https://i.creativecommons.org/l/by-nc-sa/4.0/80x15.png" alt="Creative Commons BY-NC-SA 4.0 License">
         </a>
     </div>
-
-    <!-- JavaScript to trigger close.bat and close browser -->
-    <script>
-        document.getElementById('close-button').addEventListener('click', function(event) {
-            event.preventDefault();
-            fetch('http://localhost:8000/close', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ action: 'runCloseBat' })
-            })
-            .then(response => response.text())
-            .then(data => {
-                console.log('Server response:', data);
-                setTimeout(() => {
-                    window.close();
-                }, 1000);
-            })
-            .catch(error => {
-                console.warn('Servidor cerrado antes de responder. Esto es esperado.');
-                setTimeout(() => {
-                    window.close();
-                }, 500);
-            });
-        });
-    </script>
-	
-
 </body>
 </html>
