@@ -6,8 +6,8 @@
 /* Local Anta Font */
 @font-face {
     font-family: 'Anta';
-    src: url('/fonts/Anta-Regular.ttf') format('truetype');
-    font-weight: 400;
+    src: url('../fonts/Anta-Regular.ttf') format('truetype');
+    font-weight: 400; /* Normal / Regular */
     font-style: normal;
     font-display: swap;
 }
