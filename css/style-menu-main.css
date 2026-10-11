@@ -6,16 +6,8 @@
 /* Local Anta Font */
 @font-face {
     font-family: 'Anta';
-    src: url('/fonts/Anta-Regular.ttf') format('truetype');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'Anta';
-    src: url('/fonts/Anta-Regular.ttf') format('truetype');
-    font-weight: 700;
+    src: url('../fonts/Anta-Regular.ttf') format('truetype');
+    font-weight: 400; /* Normal / Regular */
     font-style: normal;
     font-display: swap;
 }
@@ -34,6 +26,9 @@ body {
     max-height: 100vh;
     overflow: hidden;
     font-family: 'Anta', Arial, Helvetica, sans-serif;
+    /* Suavizado de fuentes optimizado para ambos motores */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* Header */
@@ -72,7 +67,7 @@ nav ul {
 nav ul li {
     font-family: 'Anta', Arial, Helvetica, sans-serif;
     font-size: 16px;
-    font-weight: Regular;
+    font-weight: 400; /* Corregido: 'Regular' cambiado por 400 */
 }
 
 nav ul li a {
@@ -137,7 +132,7 @@ nav ul li:hover a {
     width: 100%;
     height: 100%;
     text-decoration: none;
-    position: relative; /* Ensure positioning context for child elements */
+    position: relative; 
 }
 
 .gallery-item img {
@@ -148,7 +143,7 @@ nav ul li:hover a {
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform 0.3s ease-in-out; /* Smooth image zoom on hover */
+    transition: transform 0.3s ease-in-out; 
 }
 
 .gallery-item:hover {
@@ -156,7 +151,7 @@ nav ul li:hover a {
 }
 
 .gallery-item:hover img {
-    transform: scale(1.1); /* Zoom image slightly on hover */
+    transform: scale(1.1); 
 }
 
 .gallery-item .gallery-name {
@@ -167,7 +162,7 @@ nav ul li:hover a {
     color: #fff;
     font-family: 'Anta', Arial, Helvetica, sans-serif;
     font-size: 14px;
-    font-weight: Regular;
+    font-weight: 400; /* Corregido: 'Regular' cambiado por 400 */
     text-align: center;
     background: rgba(0, 0, 0, 0.6);
     padding: 5px;
@@ -181,7 +176,7 @@ nav ul li:hover a {
     font-family: 'Anta', Arial, Helvetica, sans-serif;
     color: #fff;
     font-size: 18px;
-    font-weight: Regular;
+    font-weight: 400; /* Corregido: 'Regular' cambiado por 400 */
     background: rgba(0, 0, 255, 0.2);
     border-radius: 7px;
     border: 0.1px solid white;
@@ -216,7 +211,7 @@ nav ul li:hover a {
     font-family: 'Anta', Arial, Helvetica, sans-serif;
     font-size: 12px;
     color: #fff;
-    font-weight: Regular;
+    font-weight: 400; /* Corregido: 'Regular' cambiado por 400 */
 }
 
 .cc-license.text-shadow {
@@ -298,4 +293,3 @@ nav#close-nav ul li a {
     padding: 10px 20px;
     font-size: 16px;
 }
-
