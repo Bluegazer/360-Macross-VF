@@ -1,3 +1,17 @@
+/* Reusable text-shadow class */
+.text-shadow {
+    text-shadow: 1px 0 black, 0 -1px black, -1px 0 black, 0 1px black;
+}
+
+/* Local Anta Font */
+@font-face {
+    font-family: 'Anta';
+    src: url('../fonts/Anta-Regular.ttf') format('truetype');
+    font-weight: 400; /* Normal / Regular */
+    font-style: normal;
+    font-display: swap;
+}
+
 /* Fondo inspirado en hangares espaciales */
 body {
   margin: 0;
